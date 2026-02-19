@@ -176,12 +176,14 @@ export default function AdminProductsPage() {
         </div>
       </main>
 
-      <ProductFormModal
+     <div className="h-50px">
+       <ProductFormModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         product={selectedProduct}
         onSuccess={handleFormSuccess}
       />
+     </div>
 
       <Footer />
     </div>

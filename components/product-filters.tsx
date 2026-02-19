@@ -5,9 +5,7 @@ import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 
-const CATEGORIES = ["smartphones", "laptops", "tablets", "accessories", "cameras", "audio", "wearables", "gaming"]
-
-const BRANDS = ["Apple", "Samsung", "Sony", "Canon", "Nikon", "Dell", "HP", "Lenovo"]
+const CATEGORIES = ["Annual flowers", "Biennial flowers", "Perennial flowers", "Single flowers"]
 
 interface ProductFiltersProps {
   onFiltersChange?: (filters: Record<string, string>) => void
@@ -77,17 +75,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
       </div>
 
       {/* Brands */}
-      <div>
-        <h3 className="font-semibold text-sm mb-3">Brands</h3>
-        <div className="space-y-2">
-          {BRANDS.map((brand) => (
-            <label key={brand} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox checked={selectedBrand === brand} onChange={() => handleBrandChange(brand)} />
-              <span className="text-sm">{brand}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+     
 
       {/* Price Range */}
       <div>

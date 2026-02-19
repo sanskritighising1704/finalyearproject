@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { X, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,25 +17,25 @@ interface ProductFormModalProps {
 }
 
 const CATEGORIES = [
-  "smartphones",
-  "laptops",
-  "tablets",
-  "accessories",
-  "cameras",
-  "audio",
-  "wearables",
-  "gaming",
-  "other",
+  "Annual flowers",
+  "Biennial flowers",
+  "Perennial flowers",
+  "Single flowers",
 ]
 
-export function ProductFormModal({ isOpen, onClose, product, onSuccess }: ProductFormModalProps) {
+export function ProductFormModal({
+  isOpen,
+  onClose,
+  product,
+  onSuccess,
+}: ProductFormModalProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-    category: "smartphones",
+    category: "",
     brand: "",
     stock: "",
     isActive: true,
@@ -58,7 +57,7 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
         name: "",
         description: "",
         price: "",
-        category: "smartphones",
+        category: CATEGORIES[0],
         brand: "",
         stock: "",
         isActive: true,
@@ -88,7 +87,9 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
 
       toast({
         title: "Success",
-        description: product?._id ? "Product updated successfully" : "Product created successfully",
+        description: product?._id
+          ? "Product updated successfully"
+          : "Product created successfully",
       })
 
       onSuccess(response)
@@ -96,7 +97,9 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
     } catch (error) {
       toast({
         title: "Error",
-        description: product?._id ? "Failed to update product" : "Failed to create product",
+        description: product?._id
+          ? "Failed to update product"
+          : "Failed to create product",
         variant: "destructive",
       })
     } finally {
@@ -107,17 +110,20 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <Card className="w-full max-w-2xl mx-4">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>{product?._id ? "Edit Product" : "Add Product"}</CardTitle>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-auto">
+      <Card className="w-full max-w-[95%] sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg sm:text-xl">
+            {product?._id ? "Edit Product" : "Add Product"}
+          </CardTitle>
           <button
             onClick={onClose}
-            className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100"
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
@@ -127,8 +133,10 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -138,8 +146,10 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
               <textarea
                 required
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background min-h-24"
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background min-h-[6rem] resize-none focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -150,8 +160,10 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
                 type="text"
                 required
                 value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                onChange={(e) =>
+                  setFormData({ ...formData, brand: e.target.value })
+                }
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -161,8 +173,10 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
               <select
                 required
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -173,7 +187,7 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
             </div>
 
             {/* Price and Stock */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Price</label>
                 <input
@@ -182,8 +196,10 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
                   min="0"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
               <div>
@@ -193,8 +209,10 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
                   required
                   min="0"
                   value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                  onChange={(e) =>
+                    setFormData({ ...formData, stock: e.target.value })
+                  }
+                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
@@ -205,7 +223,9 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
                 type="checkbox"
                 id="isActive"
                 checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, isActive: e.target.checked })
+                }
                 className="rounded"
               />
               <label htmlFor="isActive" className="text-sm font-medium">
@@ -214,12 +234,19 @@ export function ProductFormModal({ isOpen, onClose, product, onSuccess }: Produc
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {loading && (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin inline-block" />
+                )}
                 {product?._id ? "Update Product" : "Add Product"}
               </Button>
             </div>
