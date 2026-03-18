@@ -14,6 +14,7 @@ import { apiClient } from "@/lib/api-client"
 import type { Product, ProductsResponse } from "@/lib/types"
 import { formatPrice } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import Image from "next/image"
 
 export default function AdminProductsPage() {
   const router = useRouter()
@@ -130,6 +131,7 @@ export default function AdminProductsPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
+                        <th className="text-left py-2 px-3">Image</th>
                         <th className="text-left py-2 px-3">Product</th>
                         <th className="text-left py-2 px-3">Category</th>
                         <th className="text-left py-2 px-3">Price</th>
@@ -140,6 +142,19 @@ export default function AdminProductsPage() {
                     <tbody>
                       {products.map((product) => (
                         <tr key={product._id} className="border-b hover:bg-secondary/50">
+                         <td className="py-2 px-3">
+  {product.images?.[0] ? (
+    <img
+      src={`http://localhost:5000${product.images[0]}`}
+      alt={product.name}
+      width={50}
+      height={50}
+      className="object-cover rounded"
+    />
+  ) : (
+    <div className="w-[50px] h-[50px] bg-muted rounded" />
+  )}
+</td>
                           <td className="py-2 px-3">
                             <p className="font-medium line-clamp-1">{product.name}</p>
                             <p className="text-xs text-muted-foreground">{product.brand}</p>

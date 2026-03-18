@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['images.unsplash.com'], // add the hostname here
+    domains: ['images.unsplash.com', 'localhost'],
   },
 };
 

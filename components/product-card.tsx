@@ -12,18 +12,24 @@ interface ProductCardProps {
   product: Product
   onAddToCart?: (productId: string, quantity: number) => void
 }
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:5000"
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
       <Link href={`/products/${product._id}`}>
         <div className="relative h-48 bg-secondary overflow-hidden group">
-          <Image
-            src={product.images[0] || "/placeholder.svg?height=200&width=200&query=electronics"}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform"
-          />
+ {product.images?.[0] ? (
+    <img
+      src={`http://localhost:5000${product.images[0]}`}
+      alt={product.name}
+      width={250}
+      height={250}
+      className="object-cover rounded"
+    />
+  ) : (
+    <div className="w-[50px] h-[50px] bg-muted rounded" />
+  )}
         </div>
       </Link>
 
@@ -37,7 +43,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         <div className="mt-3 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-lg font-bold text-primary">{formatPrice(product.price)}</p>
+            <p className="text-lg font-bold text-primary">Rs.{product.price}</p>
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-accent text-accent" />
               <span className="text-xs font-medium">{product.rating}</span>
