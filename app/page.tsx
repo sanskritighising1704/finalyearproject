@@ -21,6 +21,7 @@ import { useCart } from "@/contexts/cart-context";
 import { apiClient } from "@/lib/api-client";
 import type { Product } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { AISuggestions } from "@/components/ai-suggestions";
 
 const CATEGORIES = [
   { name: "Fresh Bouquets", slug: "bouquets", icon: "💐" },
@@ -240,7 +241,10 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      <div>
+        <h1>irejoklsm</h1>
+        <AISuggestions /> 
+      </div>
       {/* Categories Section */}
       <section id="categories" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
