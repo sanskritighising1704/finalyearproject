@@ -39,16 +39,11 @@ export function OrderReview({ cart, address, paymentMethod, onSubmit, loading = 
             {cart.items.map((item) => (
               <div key={item.productId} className="py-4 flex gap-4">
                 <div className="relative h-20 w-20 flex-shrink-0 bg-secondary rounded overflow-hidden">
-                  <Image
-                    src={
-                      item.product.images[0] ||
-                      "/placeholder.svg?height=80&width=80&query=electronics" ||
-                      "/placeholder.svg"
-                    }
-                    alt={item.product.name}
-                    fill
-                    className="object-cover"
-                  />
+               <img
+                          src={`http://localhost:5000${item.product.images[0]}`}
+                          alt={`existing-${item.product.name}`}
+                          className="w-20 h-20 object-cover rounded border"
+                        />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">{item.product.name}</p>

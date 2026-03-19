@@ -99,16 +99,17 @@ export default function CartPage() {
               {cart.items.map((item) => (
                 <div key={item.productId} className="p-6 flex gap-6">
                   <div className="relative h-24 w-24 flex-shrink-0 bg-secondary rounded-lg overflow-hidden">
-                    <Image
-                      src={
-                        item.product.images[0] ||
-                        "/placeholder.svg?height=100&width=100&query=electronics" ||
-                        "/placeholder.svg"
-                      }
-                      alt={item.product.name}
-                      fill
-                      className="object-cover"
-                    />
+                     {item.product.images?.[0] ? (
+    <img
+      src={`http://localhost:5000${item.product.images[0]}`}
+      alt={item.product.name}
+      width={150}
+      height={150}
+      className="object-cover rounded"
+    />
+  ) : (
+    <div className="w-[50px] h-[50px] bg-muted rounded" />
+  )}
                   </div>
 
                   <div className="flex-1 flex flex-col justify-between">
