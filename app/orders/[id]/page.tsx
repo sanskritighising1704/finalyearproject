@@ -304,7 +304,7 @@ export default function OrderDetailPage() {
                                   variant="outline"
                                   className="mt-1 text-xs h-7"
                                   onClick={() =>
-                                    openReviewModal(productId, item.product?.name || item.name)
+                                    openReviewModal(productId, item.product?.name || item.product.name)
                                   }
                                 >
                                   <Star className="w-3 h-3 mr-1" />

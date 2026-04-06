@@ -25,7 +25,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       alt={product.name}
       width={250}
       height={250}
-      className="object-cover rounded"
+      className="object-cover rounded h-full w-full group-hover:scale-105 transition-transform"
     />
   ) : (
     <div className="w-[50px] h-[50px] bg-muted rounded" />

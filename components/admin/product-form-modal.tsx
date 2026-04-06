@@ -154,21 +154,21 @@ export function ProductFormModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-auto">
-      <Card className="w-full max-w-[95%] sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <Card className="w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto">
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-lg sm:text-xl">
             {product?._id ? "Edit Product" : "Add Product"}
           </CardTitle>
           <button
             onClick={onClose}
-            className="rounded-sm opacity-70 transition-opacity hover:opacity-100"
+            className="rounded-sm p-2 opacity-70 transition-opacity hover:opacity-100"
           >
             <X className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="overflow-y-auto max-h-[calc(100vh-7rem)] sm:max-h-[calc(100vh-8rem)]">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
             <div>
@@ -245,13 +245,13 @@ export function ProductFormModal({
               {existingImages.length > 0 && (
                 <div className="mt-2">
                   <p className="text-xs text-muted-foreground mb-1">Current images</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {existingImages.map((img, index) => (
                       <div key={index} className="relative group">
                         <img
                           src={`${BASE_URL}${img}`}
                           alt={`existing-${index}`}
-                          className="w-20 h-20 object-cover rounded border"
+                          className="w-full aspect-square object-cover rounded border"
                         />
                         <button
                           type="button"
@@ -285,13 +285,13 @@ export function ProductFormModal({
               {newImagePreviews.length > 0 && (
                 <div className="mt-2">
                   <p className="text-xs text-muted-foreground mb-1">New images</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {newImagePreviews.map((preview, index) => (
                       <div key={index} className="relative group">
                         <img
                           src={preview}
                           alt={`preview-${index}`}
-                          className="w-20 h-20 object-cover rounded border"
+                          className="w-full aspect-square object-cover rounded border"
                         />
                         <button
                           type="button"

@@ -205,13 +205,17 @@ export default function ProductDetailPage() {
         {/* Product Detail */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           <div className="relative h-96 md:h-full bg-secondary rounded-lg overflow-hidden">
-            <Image
-              src={product.images?.[0] || "/placeholder.svg?height=500&width=500&query=electronics"}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
+           {product.images?.[0] ? (
+    <img
+      src={`http://localhost:5000${product.images[0]}`}
+      alt={product.name}
+      width={250}
+      height={250}
+      className="object-cover rounded h-full w-full"
+    />
+  ) : (
+    <div className="w-[50px] h-[50px] bg-muted rounded" />
+  )}
           </div>
 
           <div className="flex flex-col justify-between">
