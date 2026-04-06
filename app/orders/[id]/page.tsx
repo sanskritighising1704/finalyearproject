@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Check, Star } from "lucide-react"
+import { ArrowLeft, Check, Star, ThumbsUp, Minus, ThumbsDown } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -29,10 +29,59 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-100 text-red-800",
 }
 
+// Sentiment options map to a numeric rating for the backend
+type Sentiment = "positive" | "neutral" | "negative"
+
+const SENTIMENT_OPTIONS: {
+  value: Sentiment
+  label: string
+  rating: number
+  icon: React.ReactNode
+  activeClass: string
+  inactiveClass: string
+}[] = [
+  {
+    value: "positive",
+    label: "Positive",
+    rating: 5,
+    icon: <ThumbsUp className="w-6 h-6" />,
+    activeClass:
+      "border-green-500 bg-green-50 text-green-700 shadow-green-100 shadow-md",
+    inactiveClass:
+      "border-gray-200 bg-white text-gray-400 hover:border-green-300 hover:text-green-500 hover:bg-green-50",
+  },
+  {
+    value: "neutral",
+    label: "Neutral",
+    rating: 3,
+    icon: <Minus className="w-6 h-6" />,
+    activeClass:
+      "border-yellow-500 bg-yellow-50 text-yellow-700 shadow-yellow-100 shadow-md",
+    inactiveClass:
+      "border-gray-200 bg-white text-gray-400 hover:border-yellow-300 hover:text-yellow-500 hover:bg-yellow-50",
+  },
+  {
+    value: "negative",
+    label: "Negative",
+    rating: 1,
+    icon: <ThumbsDown className="w-6 h-6" />,
+    activeClass:
+      "border-red-500 bg-red-50 text-red-700 shadow-red-100 shadow-md",
+    inactiveClass:
+      "border-gray-200 bg-white text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50",
+  },
+]
+
+const ratingToSentiment = (rating: number): Sentiment => {
+  if (rating >= 4) return "positive"
+  if (rating === 3) return "neutral"
+  return "negative"
+}
+
 export interface OrderResponse { order: Order }
 
 interface ReviewedMap {
-  [productId: string]: { rating: number; comment: string }
+  [productId: string]: { rating: number; comment: string; sentiment: Sentiment }
 }
 
 export default function OrderDetailPage() {
@@ -45,8 +94,7 @@ export default function OrderDetailPage() {
   // Modal state
   const [reviewModal, setReviewModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string } | null>(null)
-  const [rating, setRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
+  const [sentiment, setSentiment] = useState<Sentiment | null>(null)
   const [comment, setComment] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
@@ -63,7 +111,11 @@ export default function OrderDetailPage() {
         const map: ReviewedMap = {}
         reviewRes.reviews.forEach((r) => {
           const pid = r.product?._id || r.product
-          map[pid] = { rating: r.rating, comment: r.comment }
+          map[pid] = {
+            rating: r.rating,
+            comment: r.comment,
+            sentiment: ratingToSentiment(r.rating),
+          }
         })
         setReviewedMap(map)
       } catch {
@@ -77,17 +129,19 @@ export default function OrderDetailPage() {
 
   const openReviewModal = (productId: string, productName: string) => {
     setSelectedProduct({ id: productId, name: productName })
-    setRating(0)
-    setHoverRating(0)
+    setSentiment(null)
     setComment("")
     setReviewModal(true)
   }
 
   const submitReview = async () => {
-    if (!selectedProduct || rating === 0 || !comment.trim()) {
-      toast({ title: "Please add a rating and comment", variant: "destructive" })
+    if (!selectedProduct || !sentiment || !comment.trim()) {
+      toast({ title: "Please select a sentiment and add a comment", variant: "destructive" })
       return
     }
+    const selectedOption = SENTIMENT_OPTIONS.find((o) => o.value === sentiment)!
+    const rating = selectedOption.rating
+
     setSubmitting(true)
     try {
       await apiClient.post("/reviews", {
@@ -98,7 +152,7 @@ export default function OrderDetailPage() {
       })
       setReviewedMap((prev) => ({
         ...prev,
-        [selectedProduct.id]: { rating, comment },
+        [selectedProduct.id]: { rating, comment, sentiment },
       }))
       toast({ title: "Review submitted!", description: "Thank you for your feedback." })
       setReviewModal(false)
@@ -198,10 +252,14 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="space-y-4 divide-y">
                   {order.items.map((item) => {
-                    // ✅ use item.product since Order model stores it as "product"
                     const productId = (item.product?._id || item.product)?.toString()
                     const alreadyReviewed = !!reviewedMap[productId]
                     const existingReview = reviewedMap[productId]
+
+                    // Icon for the existing review sentiment badge
+                    const sentimentOption = existingReview
+                      ? SENTIMENT_OPTIONS.find((o) => o.value === existingReview.sentiment)
+                      : null
 
                     return (
                       <div key={productId} className="py-4 flex gap-4">
@@ -231,21 +289,14 @@ export default function OrderDetailPage() {
                           {/* Review Button — only for delivered orders */}
                           {isDelivered && (
                             <div className="mt-2">
-                              {alreadyReviewed ? (
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                  <div className="flex">
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                      <Star
-                                        key={s}
-                                        className={`w-4 h-4 ${
-                                          s <= existingReview.rating
-                                            ? "fill-yellow-400 text-yellow-400"
-                                            : "text-gray-300"
-                                        }`}
-                                      />
-                                    ))}
-                                  </div>
-                                  <span className="ml-1 text-xs">Reviewed</span>
+                              {alreadyReviewed && sentimentOption ? (
+                                <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${sentimentOption.activeClass}`}>
+                                  {sentimentOption.icon &&
+                                    <span className="w-3.5 h-3.5 [&>svg]:w-3.5 [&>svg]:h-3.5">
+                                      {sentimentOption.icon}
+                                    </span>
+                                  }
+                                  {sentimentOption.label} · Reviewed
                                 </div>
                               ) : (
                                 <Button
@@ -344,31 +395,30 @@ export default function OrderDetailPage() {
 
           <div className="space-y-5 py-2">
 
-            {/* Star Rating */}
+            {/* Sentiment Selector */}
             <div>
-              <p className="text-sm font-medium mb-2">Your Rating</p>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
+              <p className="text-sm font-medium mb-3">How was your experience?</p>
+              <div className="grid grid-cols-3 gap-3">
+                {SENTIMENT_OPTIONS.map((option) => (
                   <button
-                    key={star}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    onClick={() => setRating(star)}
-                    className="focus:outline-none transition-transform hover:scale-110"
+                    key={option.value}
+                    onClick={() => setSentiment(option.value)}
+                    className={`flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 transition-all duration-150 font-medium text-sm ${
+                      sentiment === option.value
+                        ? option.activeClass
+                        : option.inactiveClass
+                    }`}
                   >
-                    <Star
-                      className={`w-8 h-8 transition-colors ${
-                        star <= (hoverRating || rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
+                    {option.icon}
+                    <span>{option.label}</span>
                   </button>
                 ))}
               </div>
-              {rating > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][rating]}
+              {sentiment && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  {sentiment === "positive" && "⭐ 5 stars — Great experience!"}
+                  {sentiment === "neutral" && "⭐ 3 stars — It was okay."}
+                  {sentiment === "negative" && "⭐ 1 star — Needs improvement."}
                 </p>
               )}
             </div>
@@ -399,7 +449,7 @@ export default function OrderDetailPage() {
               </Button>
               <Button
                 onClick={submitReview}
-                disabled={submitting || rating === 0 || !comment.trim()}
+                disabled={submitting || !sentiment || !comment.trim()}
               >
                 {submitting ? "Submitting..." : "Submit Review"}
               </Button>

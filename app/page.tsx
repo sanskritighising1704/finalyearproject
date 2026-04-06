@@ -242,7 +242,7 @@ export default function Home() {
         </div>
       </section>
       <div>
-        <h1>irejoklsm</h1>
+        ttt
         <AISuggestions /> 
       </div>
       {/* Categories Section */}

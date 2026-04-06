@@ -84,7 +84,7 @@ export function AISuggestions() {
               {/* Image */}
               <div className="relative h-40 md:h-48 bg-muted overflow-hidden">
                 <img
-                  src={`http://localhost:5000${product.images?.[0]}`}
+                  src={`http://localhost:5001${product.images?.[0]}`}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

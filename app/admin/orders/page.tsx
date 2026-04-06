@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -21,36 +22,45 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
+  // FIX #3: Defined fetchOrders with useCallback so it's stable
+  // and can be reused (e.g. after a status refresh if needed)
+  const fetchOrders = useCallback(async () => {
+    try {
+      const response = await apiClient.get<OrdersResponse>("/admin/orders")
+      setOrders(response.orders || [])
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }, [toast])
+
+  // FIX #2: Cleaned up useEffect — wait for auth to resolve first,
+  // then guard by role, then fetch. No redundant condition split.
   useEffect(() => {
-    if (!authLoading && user?.role !== "admin") {
+    if (authLoading) return
+
+    if (user?.role !== "admin") {
       router.push("/")
       return
     }
 
-    const fetchOrders = async () => {
-      try {
-        const response = await apiClient.get<OrdersResponse>("/admin/orders")
-        setOrders(response.orders || [])
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load orders",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (!authLoading && user?.role === "admin") {
-      fetchOrders()
-    }
-  }, [authLoading, user, router, toast])
+    fetchOrders()
+  }, [authLoading, user, router, fetchOrders])
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
       await apiClient.put(`/admin/orders/${orderId}`, { status: newStatus })
-      setOrders(orders.map((o) => (o._id === orderId ? { ...o, status: newStatus as any } : o)))
+
+      // FIX #1: Was updating `status` instead of `orderStatus` — silently broke UI
+      setOrders(orders.map((o) =>
+        o._id === orderId ? { ...o, orderStatus: newStatus as Order["orderStatus"] } : o
+      ))
+
       toast({
         title: "Success",
         description: "Order status updated",
@@ -95,50 +105,58 @@ export default function AdminOrdersPage() {
           <div className="md:col-span-3">
             <Card>
               <CardContent className="pt-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3">Order ID</th>
-                        <th className="text-left py-2 px-3">Date</th>
-                        <th className="text-left py-2 px-3">Total</th>
-                        <th className="text-left py-2 px-3">Status</th>
-                        <th className="text-left py-2 px-3">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map((order) => (
-                        <tr key={order._id} className="border-b hover:bg-secondary/50">
-                          <td className="py-2 px-3 font-mono text-xs">{order._id.slice(0, 8)}</td>
-                          <td className="py-2 px-3 text-xs">{formatDate(order.orderDate)}</td>
-                          <td className="py-2 px-3 font-semibold">{formatPrice(order.totalPrice)}</td>
-                          <td className="py-2 px-3">
-                            <Select
-                              value={order.orderStatus}
-                              onValueChange={(value) => handleStatusUpdate(order._id, value)}
-                            >
-                              <SelectTrigger className="w-32 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="confirmed">Confirmed</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </td>
-                          <td className="py-2 px-3">
-                            <Button variant="outline" size="sm" asChild>
-                              <a href={`/orders/${order._id}`}>View</a>
-                            </Button>
-                          </td>
+                {/* FIX #4: Added empty state so the table doesn't render blank */}
+                {orders.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    No orders found.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2 px-3">Order ID</th>
+                          <th className="text-left py-2 px-3">Date</th>
+                          <th className="text-left py-2 px-3">Total</th>
+                          <th className="text-left py-2 px-3">Status</th>
+                          <th className="text-left py-2 px-3">Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {orders.map((order) => (
+                          <tr key={order._id} className="border-b hover:bg-secondary/50">
+                            <td className="py-2 px-3 font-mono text-xs">{order._id.slice(0, 8)}</td>
+                            <td className="py-2 px-3 text-xs">{formatDate(order.orderDate)}</td>
+                            <td className="py-2 px-3 font-semibold">{formatPrice(order.totalPrice)}</td>
+                            <td className="py-2 px-3">
+                              <Select
+                                value={order.orderStatus}
+                                onValueChange={(value) => handleStatusUpdate(order._id, value)}
+                              >
+                                <SelectTrigger className="w-32 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                                  <SelectItem value="shipped">Shipped</SelectItem>
+                                  <SelectItem value="delivered">Delivered</SelectItem>
+                                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </td>
+                            <td className="py-2 px-3">
+                              {/* FIX #5: Replaced <a> with Next.js <Link> for client-side navigation */}
+                              <Button variant="outline" size="sm" asChild>
+                                <Link href={`/orders/${order._id}`}>View</Link>
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
