@@ -241,10 +241,9 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <div>
-        ttt
+      {/* <div>
         <AISuggestions /> 
-      </div>
+      </div> */}
       {/* Categories Section */}
       <section id="categories" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">

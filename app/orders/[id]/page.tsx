@@ -279,7 +279,7 @@ export default function OrderDetailPage() {
                             href={`/products/${productId}`}
                             className="font-medium hover:text-primary transition-colors"
                           >
-                            {item.product?.name || item.name}
+                            {item.product?.name || item.product.name}
                           </Link>
                           <p className="text-sm text-muted-foreground mt-1">Qty: {item.quantity}</p>
                           <p className="text-sm text-muted-foreground">

@@ -54,7 +54,7 @@ export default function AdminOrdersPage() {
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
-      await apiClient.put(`/admin/orders/${orderId}`, { status: newStatus })
+      await apiClient.put(`/admin/orders/${orderId}`, { orderStatus: newStatus })
 
       // FIX #1: Was updating `status` instead of `orderStatus` — silently broke UI
       setOrders(orders.map((o) =>
